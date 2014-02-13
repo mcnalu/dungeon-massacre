@@ -18,6 +18,11 @@ import pygame.locals as pg
 # Dimensions of the map tiles
 MAP_TILE_WIDTH, MAP_TILE_HEIGHT = 24, 32
 
+# Motion offsets for particular directions
+#     N  E  S   W
+DX = [0, 1, 0, -1]
+DY = [-1, 0, 1, 0]
+
 class TileCache(object):
     """Load the tilesets lazily into global cache"""
 
@@ -121,13 +126,13 @@ class Player(Sprite):
     def walk_animation(self):
         """Animation for the player walking."""
 
-        # This animation is hardcoded for 4 frames and 16x24 map tiles
+        # This animation is hardcoded for 4 frames and 24x32 map tiles
         for frame in range(4):
             self.image = self.frames[self.direction][frame]
             yield None
-            self.move(3*DX[self.direction], 2*DY[self.direction])
+            self.move(3*DX[self.direction], 4*DY[self.direction])
             yield None
-            self.move(3*DX[self.direction], 2*DY[self.direction])
+            self.move(3*DX[self.direction], 4*DY[self.direction])
 
     def update(self, *args):
         """Run the current animation or just stand there if no animation set."""

@@ -80,7 +80,7 @@ block = true
 name = door
 tile = 0, 4
 sprite = door.png
-block = true
+block = false
 
 [c]
 name = chest

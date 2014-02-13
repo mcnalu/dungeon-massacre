@@ -40,6 +40,34 @@ class Game(object):
         # Render the level map
         self.background = self.level.render()
 
+    def control(self):
+        """Handle the controls of the game."""
+
+        keys = pygame.key.get_pressed()
+
+        def pressed(key):
+            """Check if the specified key is pressed."""
+
+            return self.pressed_key == key or keys[key]
+
+        def walk(d):
+            """Start walking in specified direction."""
+
+            x, y = self.player.pos
+            self.player.direction = d
+            if not self.level.is_blocking(x+DX[d], y+DY[d]):
+                self.player.animation = self.player.walk_animation()
+
+        if pressed(pg.K_UP):
+            walk(0)
+        elif pressed(pg.K_DOWN):
+            walk(2)
+        elif pressed(pg.K_LEFT):
+            walk(3)
+        elif pressed(pg.K_RIGHT):
+            walk(1)
+        self.pressed_key = None
+
     def main(self):
         """Run the main loop."""
 
@@ -52,8 +80,11 @@ class Game(object):
             # Clear sprites.
             self.sprites.clear(self.screen, self.background)
             self.sprites.update()
-			#several removed lines
-			
+            # If the player's animation is finished, check for keypresses
+            if self.player.animation is None:
+                self.control()
+                self.player.update()
+			#lines related to shadows removed
             dirty = self.sprites.draw(self.screen)
 
             # Update the dirty areas of the screen

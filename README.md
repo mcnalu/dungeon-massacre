@@ -1,19 +1,5 @@
 #DUNGEON MASSACRE!
 
-##To do
-
-AJC:
-
-- //Write level loading code
-- //Make 2D from above
-- support new objects and tiles
-
-APC:
-
-- Design one level
-
-
-
 ##Design requirements
 
 Each window is an entire level.
