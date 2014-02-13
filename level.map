@@ -1,0 +1,94 @@
+[level]
+tileset = dungeon.png
+map =   #####################################
+        #@.....z####################........#
+        #.......>>>>>>>>...........#........#
+        ################...........#........#
+        #7777777&...........................#
+        #7777777#...........................&
+        #7777777#...........................#
+        #####################################
+
+[#]
+name = wall
+wall = true
+block = true
+
+[.]
+name = floor
+tile = 0, 4
+
+[@]
+name = player
+tile = 0, 4
+player = true
+sprite = player.png
+
+[s]
+name = skeleton
+tile = 0, 4
+sprite = skeleton.png
+block = true
+
+[>]
+name = stairs
+tile = 3, 4
+
+[b]
+name = crate
+tile = 0, 4
+sprite = crate.png
+block = true
+
+[h]
+name = house
+tile = 0, 4
+sprite = house.png
+block = true
+
+[o]
+name = orange battle room
+tile = 0, 4
+sprite = orangebattleroom.png
+block: true
+
+[g]
+name = goblin
+tile = 0, 4
+sprite: goblin.png
+block: true
+
+[b]
+name = bats
+tile = 0, 4
+sprite = bats.png
+block = true
+
+[b]
+name = hobgoblin
+tile = 0, 4
+sprite = hobgoblin.png
+block = true
+
+[z]
+name = bed
+tile = 0, 4
+sprite = bed.png
+block = true
+
+[&]
+name = door
+tile = 0, 4
+sprite = door.png
+block = true
+
+[c]
+name = chest
+tile = 0, 4
+sprite = chest.png
+block = true
+
+[7]
+name = grass
+tile = 2, 4
+block = false
