@@ -46,9 +46,10 @@ class TileCache(object):
     def _load_tile_table(self, filename, width, height):
         """Load an image and split it into tiles."""
         try:
-            image = pygame.image.load(filename).convert()
+            image = pygame.image.load(filename)
         except:
-            image = pygame.image.load('missing.png').convert()
+            image = pygame.image.load('missing.png')
+        image = image.convert_alpha()
         image_width, image_height = image.get_size()
         tile_table = []
         for tile_x in range(0, image_width/width):
@@ -144,6 +145,24 @@ class Player(Sprite):
                 self.animation.next()
             except StopIteration:
                 self.animation = None
+
+class Score(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.font = pygame.font.Font(None, 20)
+        #self.font.set_italic(1)
+        self.color = pygame.Color('white')
+        self.lastscore = -1
+        self.score=0
+        self.update()
+        self.rect = self.image.get_rect().move(x, y)
+
+    def update(self):
+        if self.score != self.lastscore:
+            self.lastscore = self.score
+            msg = "Score: %d" % self.score
+            self.image = self.font.render(msg, 0, self.color)
+
 
 class Level(object):
     """Load and store the map of the level, together with all the items."""
@@ -266,3 +285,14 @@ class Level(object):
         if not 0 <= x < self.width or not 0 <= y < self.height:
             return True
         return self.get_bool(x, y, 'block')
+
+    def get_item(self, x, y):
+        """Interacts with an item, if present."""
+
+        if (x, y) in self.items:
+            return self.items[(x,y)]
+            
+    def remove_item(self, x, y):
+        del self.items[(x,y)]
+                    
+

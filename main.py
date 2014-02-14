@@ -10,6 +10,9 @@ Dungeon massacre. A dungeon crawling game
 """
 
 from rdlevel import *
+from random import randint
+from pygame import Rect, Color
+
 
 class Game(object):
     """The main game object."""
@@ -21,6 +24,8 @@ class Game(object):
         #several removed lines
         self.sprites = pygame.sprite.RenderUpdates()
         self.use_level(Level())
+        self.score = Score(10,10) #self.level.height*MAP_TILE_HEIGHT)
+        self.sprites.add(self.score)
 
     def use_level(self, level):
         """Set the level as the current one."""
@@ -29,13 +34,14 @@ class Game(object):
         self.sprites = pygame.sprite.RenderUpdates()
         self.level = level
         # Populate the game with the level's objects
-        for pos, tile in level.items.iteritems():
-            if tile.get("player") in ('true', '1', 'yes', 'on'):
+        for pos, item in level.items.iteritems():
+            if item.get("player") in ('true', '1', 'yes', 'on'):
                 sprite = Player(pos)
                 self.player = sprite
             else:
-                sprite = Sprite(pos, SPRITE_CACHE[tile["sprite"]])
+                sprite = Sprite(pos, SPRITE_CACHE[item["sprite"]])
             self.sprites.add(sprite)
+            item['sprite_obj']=sprite
 
         # Render the level map
         self.background = self.level.render()
@@ -55,9 +61,15 @@ class Game(object):
 
             x, y = self.player.pos
             self.player.direction = d
-            if not self.level.is_blocking(x+DX[d], y+DY[d]):
+            xnew, ynew = x+DX[d], y+DY[d]
+            if not self.level.is_blocking(xnew, ynew):
                 self.player.animation = self.player.walk_animation()
-
+                item=self.level.get_item(xnew, ynew)
+                if self.take_treasure(item):
+                    print 'Found treasure: ', item
+                    self.level.remove_item(xnew, ynew)
+                    self.sprites.remove(item['sprite_obj'])
+                    
         if pressed(pg.K_UP):
             walk(0)
         elif pressed(pg.K_DOWN):
@@ -67,6 +79,16 @@ class Game(object):
         elif pressed(pg.K_RIGHT):
             walk(1)
         self.pressed_key = None
+
+    def take_treasure(self,item):
+        try:
+            name,level = item['name'].split('-')
+        except:
+            return False
+        v=[250,500,750,1000]
+        self.score.score+=int(level)*v[randint(0,3)]
+        print self.score.score
+        return True
 
     def main(self):
         """Run the main loop."""
@@ -89,6 +111,7 @@ class Game(object):
 
             # Update the dirty areas of the screen
             pygame.display.update(dirty)
+
             
             # Wait for one tick of the game clock
             clock.tick(15)

@@ -2,9 +2,9 @@
 tileset = dungeon.png
 map =   #####################################
         #@.....z####################........#
-        #.......>>>>>>>>...........#........#
+        #..1....>>>>>>>>....2......#........#
         ################...........#........#
-        #7777777&...........................#
+        #7777777&.............3.............#
         #7777777#...........................&
         #7777777#...........................#
         #####################################
@@ -23,6 +23,36 @@ name = player
 tile = 0, 4
 player = true
 sprite = player.png
+
+[1]
+name = treasure-1
+tile = 0, 4
+sprite = treasure.png
+
+[2]
+name = treasure-2
+tile = 0, 4
+sprite = treasure.png
+
+[3]
+name = treasure-3
+tile = 0, 4
+sprite = treasure.png
+
+[4]
+name = treasure-4
+tile = 0, 4
+sprite = treasure.png
+
+[5]
+name = treasure-5
+tile = 0, 4
+sprite = treasure.png
+
+[6]
+name = treasure-6
+tile = 0, 4
+sprite = treasure.png
 
 [s]
 name = skeleton
