@@ -69,6 +69,15 @@ class Game(object):
                     print 'Found treasure: ', item
                     self.level.remove_item(xnew, ynew)
                     self.sprites.remove(item['sprite_obj'])
+        
+        def fight():
+            x, y = self.player.pos
+            d= self.player.direction
+            x1, y1 = x+DX[d], y+DY[d]
+            item=self.level.get_item(x1, y1)
+            if item is not None and 'monster' in item:
+                 self.level.remove_item(x1, y1)
+                 self.sprites.remove(item['sprite_obj'])               
                     
         if pressed(pg.K_UP):
             walk(0)
@@ -78,6 +87,8 @@ class Game(object):
             walk(3)
         elif pressed(pg.K_RIGHT):
             walk(1)
+        elif pressed(pg.K_SPACE):
+            fight()
         self.pressed_key = None
 
     def take_treasure(self,item):

@@ -169,7 +169,7 @@ class Level(object):
 
     def __init__(self, filename="level.map"):
         self.tileset = ''
-        self.map = []
+        self.map = {}
         self.items = {}
         self.key = {}
         self.width = 0
@@ -182,17 +182,19 @@ class Level(object):
         parser = ConfigParser.ConfigParser()
         parser.read(filename)
         self.tileset = parser.get("level", "tileset")
-        self.map = parser.get("level", "map").split("\n")
+        smap = parser.get("level", "map").split("\n")
         for section in parser.sections():
             if len(section) == 1:
                 desc = dict(parser.items(section))
                 self.key[section] = desc
-        self.width = len(self.map[0])
-        self.height = len(self.map)
-        for y, line in enumerate(self.map):
+        self.width = len(smap[0])
+        self.height = len(smap)
+        for y, line in enumerate(smap):
             for x, c in enumerate(line):
+                self.map[(x, y)]=c
                 if not self.is_wall(x, y) and 'sprite' in self.key[c]:
                     self.items[(x, y)] = self.key[c]
+                    self.map[(x, y)]='.'
 
     def render(self):
         """Draw the level on the surface."""
@@ -200,8 +202,8 @@ class Level(object):
         wall = self.is_wall
         tiles = MAP_CACHE[self.tileset]
         image = pygame.Surface((self.width*MAP_TILE_WIDTH, self.height*MAP_TILE_HEIGHT))
-        for map_y, line in enumerate(self.map):
-            for map_x, c in enumerate(line):
+        for map_x in range(0, self.width):
+            for map_y in range(0, self.height):
                 if wall(map_x, map_y):
                     # Draw different tiles depending on neighbourhood
                     if wall(map_x, map_y+1): #wall below
@@ -243,6 +245,7 @@ class Level(object):
                             else:
                                 tile = 2, 2
                 else:
+                    c = self.map[(map_x, map_y)]
                     try:
                         tile = self.key[c]['tile'].split(',')
                         tile = int(tile[0]), int(tile[1])
@@ -256,9 +259,11 @@ class Level(object):
 
     def get_tile(self, x, y):
         """Tell what's at the specified position of the map."""
-
+        item = self.get_item(x, y)
+        if item is not None:
+            return item
         try:
-            char = self.map[y][x]
+            char = self.map[(x, y)]
         except IndexError:
             return {}
         try:
@@ -291,8 +296,10 @@ class Level(object):
 
         if (x, y) in self.items:
             return self.items[(x,y)]
+        else:
+            return None
             
     def remove_item(self, x, y):
-        del self.items[(x,y)]
+        del self.items[(x, y)]
                     
 
