@@ -14,6 +14,7 @@ from random import randint
 from pygame import Rect, Color
 
 
+
 class Game(object):
     """The main game object."""
 
@@ -36,10 +37,10 @@ class Game(object):
         # Populate the game with the level's objects
         for pos, item in level.items.iteritems():
             if item.get("player") in ('true', '1', 'yes', 'on'):
-                sprite = Player(pos)
+                sprite = Player(self, item, pos)
                 self.player = sprite
             else:
-                sprite = Sprite(pos, SPRITE_CACHE[item["sprite"]])
+                sprite = Sprite(self, item, pos, SPRITE_CACHE[item["sprite"]])
             self.sprites.add(sprite)
             item['sprite_obj']=sprite
 

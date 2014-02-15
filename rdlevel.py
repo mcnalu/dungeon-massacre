@@ -69,8 +69,10 @@ class Sprite(pygame.sprite.Sprite):
 
     is_player = False
 
-    def __init__(self, pos=(0, 0), frames=None):
+    def __init__(self, game, item, pos=(0, 0), frames=None):
         super(Sprite, self).__init__()
+        self.game=game
+        self.item=item
         if frames:
             self.frames = frames
         self.image = self.frames[0][0]
@@ -109,17 +111,27 @@ class Sprite(pygame.sprite.Sprite):
 
     def update(self, *args):
         """Run the current animation."""
-
+        
         self.animation.next()
+        if 'monster' in self.item:
+            if self.is_adjacent(self.game.player):
+                self.game.score.health-=1
+                
+    def is_adjacent(self, player):
+        d=abs(player.pos[0]-self.pos[0])+abs(player.pos[1]-self.pos[1])
+        if d==1:
+            return True
+        else:
+            return False
 
 class Player(Sprite):
     """ Display and animate the player character."""
 
     is_player = True
 
-    def __init__(self, pos=(1, 1)):
+    def __init__(self, game, item, pos=(1, 1)):
         self.frames = SPRITE_CACHE["player.png"]
-        Sprite.__init__(self, pos)
+        Sprite.__init__(self, game, item, pos)
         self.direction = 2
         self.animation = None
         self.image = self.frames[self.direction][0]
@@ -150,17 +162,24 @@ class Score(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
         self.font = pygame.font.Font(None, 20)
-        #self.font.set_italic(1)
         self.color = pygame.Color('white')
-        self.lastscore = -1
+        self.last_score = -1
         self.score=0
+        self.last_health = 100
+        self.health= 100
         self.update()
         self.rect = self.image.get_rect().move(x, y)
 
     def update(self):
-        if self.score != self.lastscore:
-            self.lastscore = self.score
-            msg = "Score: %d" % self.score
+        update=False
+        if self.score != self.last_score:
+            self.last_score = self.score
+            update = True
+        if self.health != self.last_health:
+            self.last_heath = self.health
+            update = True
+        if update:
+            msg = "Score: %6d   Health: %3d" % (self.score, self.health)
             self.image = self.font.render(msg, 0, self.color)
 
 
