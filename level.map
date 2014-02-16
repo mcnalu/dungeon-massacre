@@ -29,36 +29,43 @@ sprite = player.png
 name = treasure-0
 title = 0, 4
 sprite = treasure.png
+treasure=0
 
 [1]
 name = treasure-1
 tile = 0, 4
 sprite = treasure.png
+treasure=1
 
 [2]
 name = treasure-2
 tile = 0, 4
 sprite = treasure.png
+treasure=2
 
 [3]
 name = treasure-3
 tile = 0, 4
 sprite = treasure.png
+treasure=3
 
 [4]
 name = treasure-4
 tile = 0, 4
 sprite = treasure.png
+treasure=4
 
 [5]
 name = treasure-5
 tile = 0, 4
 sprite = treasure.png
+treasure=5
 
 [6]
 name = treasure-6
 tile = 0, 4
 sprite = treasure.png
+treasure=6
 
 [s]
 name = skeleton
@@ -87,13 +94,13 @@ block = true
 name = orange battle room
 tile = 0, 4
 sprite = orangebattleroom.png
-block: true
+block = true
 
 [g]
 name = goblin
 tile = 0, 4
 sprite: goblin.png
-block: true
+block = true
 
 [b]
 name = bats
@@ -111,13 +118,11 @@ block = true
 name = bed
 tile = 0, 4
 sprite = bed.png
-block = false
 
 [&]
 name = door
 tile = 0, 4
 sprite = door.png
-block = false
 
 [c]
 name = chest
@@ -128,4 +133,3 @@ block = true
 [7]
 name = grass
 tile = 2, 4
-block = false

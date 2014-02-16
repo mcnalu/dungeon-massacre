@@ -50,22 +50,21 @@ class Game(object):
             xnew, ynew = x+DX[d], y+DY[d]
             if not self.level.is_blocking(xnew, ynew):
                 self.level.player.animation = self.level.player.walk_animation()
-                item=self.level.get_item(xnew, ynew)
-                if self.take_treasure(item):
+                item=self.level.get_item(xnew, ynew, 'treasure')
+                if item is not None:
                     print 'Found treasure: ', item
+                    v=[250,500,750,1000]
+                    self.score.score+=int(item['treasure'])*v[randint(0,3)]
+                    print self.score.score
                     self.level.remove_item(item)
         
         def fight():
             x, y = self.level.player.pos
             d= self.level.player.direction
             x1, y1 = x+DX[d], y+DY[d]
-            item=self.level.get_item(x1, y1)
-            print 'p',x,y
-            print 'f',x1,y1
-            print 's',self.level.skelly.pos
-            print item
-            if item is not None and 'monster' in item:
-                 self.level.remove_item(item)
+            monster=self.level.get_item(x1, y1,'monster')
+            if monster is not None:
+                 self.level.remove_item(monster)
                     
         if pressed(pg.K_UP):
             walk(0)
@@ -78,16 +77,6 @@ class Game(object):
         elif pressed(pg.K_SPACE):
             fight()
         self.pressed_key = None
-
-    def take_treasure(self,item):
-        try:
-            name,lev = item['name'].split('-')
-        except:
-            return False
-        v=[250,500,750,1000]
-        self.score.score+=int(lev)*v[randint(0,3)]
-        print self.score.score
-        return True
 
     def main(self):
         """Run the main loop."""

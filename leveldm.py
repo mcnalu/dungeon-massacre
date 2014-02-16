@@ -24,8 +24,6 @@ class Level(object):
                 sprite = Sprite(game, item, SPRITE_CACHE[item["sprite"]])
             self.sprites.add(sprite)
             item['sprite_obj']=sprite
-            if item['name']=='skeleton':
-                self.skelly=sprite
 
     def load_file(self, filename="level.map"):
         """Load the level from specified file."""
@@ -113,10 +111,7 @@ class Level(object):
         return image
 
     def get_tile(self, x, y):
-        """Tell what's at the specified position of the map."""
-        item = self.get_item(x, y)
-        if item is not None:
-            return item
+        """Get the tile dict from the map."""
         try:
             char = self.map[(x, y)]
         except IndexError:
@@ -126,32 +121,24 @@ class Level(object):
         except KeyError:
             return {}
 
-    def get_bool(self, x, y, name):
-        """Tell if the specified flag is set for position on the map."""
-
-        value = self.get_tile(x, y).get(name)
-        return value in (True, 1, 'true', 'yes', 'True', 'Yes', '1', 'on', 'On')
-
     def is_wall(self, x, y):
-        """Is there a wall?"""
-        if x<0 or x>=self.width or y<0 or y>=self.height:
-            return True
-
-        return self.get_bool(x, y, 'wall')
-
-    def is_blocking(self, x, y):
-        """Is this place blocking movement?"""
-
         if not 0 <= x < self.width or not 0 <= y < self.height:
             return True
-        return self.get_bool(x, y, 'block')
+        return 'wall' in self.get_tile(x, y)
 
-    def get_item(self, x, y):
-        """Interacts with an item, if present."""
+    def is_blocking(self, x, y):
+        if not 0 <= x < self.width or not 0 <= y < self.height:
+            return True        
+        elif self.get_item(x, y, 'block'):
+            return True
+        else:
+            return 'block' in self.get_tile(x, y)
 
+    def get_item(self, x, y, kind=None):
         for s in self.sprites:
             if s.pos==(x, y):
-                return s.item
+                if kind is None or kind in s.item:
+                    return s.item
         return None
             
     def remove_item(self, item):
