@@ -22,28 +22,12 @@ class Game(object):
         self.screen = pygame.display.get_surface()
         self.pressed_key = None
         self.game_over = False
-        #several removed lines
-        self.sprites = pygame.sprite.RenderUpdates()
-        self.use_level(Level())
-        self.score = Score(10,10) #self.level.height*MAP_TILE_HEIGHT)
-        self.sprites.add(self.score)
+        self.use_level(Level(self))
+        self.score = Score(10, self.level.height*MAP_TILE_HEIGHT)
 
     def use_level(self, level):
         """Set the level as the current one."""
-
-        #several removed lines
-        self.sprites = pygame.sprite.RenderUpdates()
         self.level = level
-        # Populate the game with the level's objects
-        for pos, item in level.items.iteritems():
-            if item.get("player") in ('true', '1', 'yes', 'on'):
-                sprite = Player(self, item, pos)
-                self.player = sprite
-            else:
-                sprite = Sprite(self, item, pos, SPRITE_CACHE[item["sprite"]])
-            self.sprites.add(sprite)
-            item['sprite_obj']=sprite
-
         # Render the level map
         self.background = self.level.render()
 
@@ -60,25 +44,27 @@ class Game(object):
         def walk(d):
             """Start walking in specified direction."""
 
-            x, y = self.player.pos
-            self.player.direction = d
+            x, y = self.level.player.pos
+            self.level.player.direction = d
             xnew, ynew = x+DX[d], y+DY[d]
             if not self.level.is_blocking(xnew, ynew):
-                self.player.animation = self.player.walk_animation()
+                self.level.player.animation = self.level.player.walk_animation()
                 item=self.level.get_item(xnew, ynew)
                 if self.take_treasure(item):
                     print 'Found treasure: ', item
-                    self.level.remove_item(xnew, ynew)
-                    self.sprites.remove(item['sprite_obj'])
+                    self.level.remove_item(item)
         
         def fight():
-            x, y = self.player.pos
-            d= self.player.direction
+            x, y = self.level.player.pos
+            d= self.level.player.direction
             x1, y1 = x+DX[d], y+DY[d]
             item=self.level.get_item(x1, y1)
+            print 'p',x,y
+            print 'f',x1,y1
+            print 's',self.level.skelly.pos
+            print item
             if item is not None and 'monster' in item:
-                 self.level.remove_item(x1, y1)
-                 self.sprites.remove(item['sprite_obj'])               
+                 self.level.remove_item(item)
                     
         if pressed(pg.K_UP):
             walk(0)
@@ -94,11 +80,11 @@ class Game(object):
 
     def take_treasure(self,item):
         try:
-            name,level = item['name'].split('-')
+            name,lev = item['name'].split('-')
         except:
             return False
         v=[250,500,750,1000]
-        self.score.score+=int(level)*v[randint(0,3)]
+        self.score.score+=int(lev)*v[randint(0,3)]
         print self.score.score
         return True
 
@@ -108,23 +94,27 @@ class Game(object):
         clock = pygame.time.Clock()
         # Draw the whole screen initially
         self.screen.blit(self.background, (0, 0))
+        self.screen.blit(self.score.image,self.score.rect)
+
         pygame.display.flip()
         # The main game loop
         while not self.game_over:
             # Clear sprites.
-            self.sprites.clear(self.screen, self.background)
-            self.sprites.update()
+            self.level.sprites.clear(self.screen, self.background)
+            self.level.sprites.update()
             # If the player's animation is finished, check for keypresses
-            if self.player.animation is None:
+            if self.level.player.animation is None:
                 self.control()
-                self.player.update()
+                self.level.player.update()
 			#lines related to shadows removed
-            dirty = self.sprites.draw(self.screen)
+            dirty_rects = self.level.sprites.draw(self.screen)
 
             # Update the dirty areas of the screen
-            pygame.display.update(dirty)
-
-            
+            if self.score.update():
+                self.screen.fill(self.score.background_color,self.score.rect)
+                self.screen.blit(self.score.image,self.score.rect)
+                dirty_rects.append(self.score.rect)
+            pygame.display.update(dirty_rects)
             # Wait for one tick of the game clock
             clock.tick(15)
             # Process pygame events

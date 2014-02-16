@@ -69,7 +69,7 @@ class Sprite(pygame.sprite.Sprite):
 
     is_player = False
 
-    def __init__(self, game, item, pos=(0, 0), frames=None):
+    def __init__(self, game, item, frames=None):
         super(Sprite, self).__init__()
         self.game=game
         self.item=item
@@ -78,7 +78,7 @@ class Sprite(pygame.sprite.Sprite):
         self.image = self.frames[0][0]
         self.rect = self.image.get_rect()
         self.animation = self.stand_animation()
-        self.pos = pos
+        self.pos = item['init_pos']
 
     def _get_pos(self):
         """Check the current position of the sprite on the map."""
@@ -114,12 +114,28 @@ class Sprite(pygame.sprite.Sprite):
         
         self.animation.next()
         if 'monster' in self.item:
-            if self.is_adjacent(self.game.player):
+            p=self.game.level.player
+            if self.is_adjacent(p):
                 self.game.score.health-=1
+            elif self.get_distance(p)<6:
+                if abs(p.pos[0]-self.pos[0])>=abs(p.pos[1]-self.pos[1]):
+                    if p.pos[0]<self.pos[0]:
+                        d=3
+                    else:
+                        d=1
+                else:
+                    if p.pos[1]<self.pos[1]:
+                        d=0
+                    else:
+                        d=2
+                self.pos=(self.pos[0]+DX[d], self.pos[1]+DY[d])
+
+                 
+    def get_distance(self, other):
+        return abs(other.pos[0]-self.pos[0])+abs(other.pos[1]-self.pos[1])
                 
-    def is_adjacent(self, player):
-        d=abs(player.pos[0]-self.pos[0])+abs(player.pos[1]-self.pos[1])
-        if d==1:
+    def is_adjacent(self, other):
+        if self.get_distance(other)==1:
             return True
         else:
             return False
@@ -129,9 +145,9 @@ class Player(Sprite):
 
     is_player = True
 
-    def __init__(self, game, item, pos=(1, 1)):
+    def __init__(self, game, item):
         self.frames = SPRITE_CACHE["player.png"]
-        Sprite.__init__(self, game, item, pos)
+        Sprite.__init__(self, game, item)
         self.direction = 2
         self.animation = None
         self.image = self.frames[self.direction][0]
@@ -161,14 +177,16 @@ class Player(Sprite):
 class Score(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
+        self.x, self.y = x, y
         self.font = pygame.font.Font(None, 20)
         self.color = pygame.Color('white')
+        self.background_color = pygame.Color('black')
         self.last_score = -1
         self.score=0
         self.last_health = 100
         self.health= 100
+        self.rect=pygame.Rect(x,y,0,0)
         self.update()
-        self.rect = self.image.get_rect().move(x, y)
 
     def update(self):
         update=False
@@ -180,20 +198,34 @@ class Score(pygame.sprite.Sprite):
             update = True
         if update:
             msg = "Score: %6d   Health: %3d" % (self.score, self.health)
-            self.image = self.font.render(msg, 0, self.color)
+            self.image = self.font.render(msg, 0, self.color,self.background_color)
+            self.rect = self.rect.union(self.image.get_rect().move(self.x, self.y))
+        return update
 
 
 class Level(object):
     """Load and store the map of the level, together with all the items."""
 
-    def __init__(self, filename="level.map"):
+    def __init__(self, game, filename="level.map"):
+        self.game=game
         self.tileset = ''
         self.map = {}
-        self.items = {}
         self.key = {}
         self.width = 0
         self.height = 0
-        self.load_file(filename)
+        self.sprites = pygame.sprite.RenderUpdates()
+        items=self.load_file(filename)
+        # Populate the game with the level's objects and monsters
+        for item in items:
+            if item.get("player") in ('true', '1', 'yes', 'on'):
+                sprite = Player(game, item)
+                self.player = sprite
+            else:
+                sprite = Sprite(game, item, SPRITE_CACHE[item["sprite"]])
+            self.sprites.add(sprite)
+            item['sprite_obj']=sprite
+            if item['name']=='skeleton':
+                self.skelly=sprite
 
     def load_file(self, filename="level.map"):
         """Load the level from specified file."""
@@ -208,12 +240,16 @@ class Level(object):
                 self.key[section] = desc
         self.width = len(smap[0])
         self.height = len(smap)
+        items = []
         for y, line in enumerate(smap):
             for x, c in enumerate(line):
                 self.map[(x, y)]=c
                 if not self.is_wall(x, y) and 'sprite' in self.key[c]:
-                    self.items[(x, y)] = self.key[c]
+                    item=self.key[c].copy()
+                    item['init_pos']=(x, y)
+                    items.append(item)
                     self.map[(x, y)]='.'
+        return items
 
     def render(self):
         """Draw the level on the surface."""
@@ -313,12 +349,13 @@ class Level(object):
     def get_item(self, x, y):
         """Interacts with an item, if present."""
 
-        if (x, y) in self.items:
-            return self.items[(x,y)]
-        else:
-            return None
+        for s in self.sprites:
+            if s.pos==(x, y):
+                return s.item
+        return None
             
-    def remove_item(self, x, y):
-        del self.items[(x, y)]
+    def remove_item(self, item):
+        self.sprites.remove(item['sprite_obj'])
+
                     
 
