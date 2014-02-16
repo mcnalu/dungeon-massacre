@@ -77,6 +77,9 @@ class Sprite(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.animation = self.stand_animation()
         self.pos = item['init_pos']
+        self.direction=-1
+        self.auto_step=0
+        self.auto_total=0
 
     def _get_pos(self):
         """Check the current position of the sprite on the map."""
@@ -90,6 +93,14 @@ class Sprite(pygame.sprite.Sprite):
         self.depth = self.rect.midbottom[1]
 
     pos = property(_get_pos, _set_pos)
+
+    def auto_move(self):
+        if self.direction>=0:
+            self.move(3*DX[self.direction], 4*DY[self.direction])
+            self.auto_step-=1
+            self.auto_total+=1
+            if self.auto_step==0:
+                self.direction=-1
 
     def move(self, dx, dy):
         """Change the position of the sprite on screen."""
@@ -105,13 +116,15 @@ class Sprite(pygame.sprite.Sprite):
             for frame in self.frames[0]:
                 self.image = frame
                 yield None
+                self.auto_move()
                 yield None
+                self.auto_move()
 
     def update(self, *args):
         """Run the current animation."""
         
         self.animation.next()
-        if 'monster' in self.item:
+        if 'monster' in self.item and self.direction==-1:
             p=self.game.level.player
             if self.is_adjacent(p):
                 self.game.score.health-=1
@@ -126,14 +139,14 @@ class Sprite(pygame.sprite.Sprite):
                         d=0
                     else:
                         d=2
-                self.pos=(self.pos[0]+DX[d], self.pos[1]+DY[d])
-
+                self.direction=d
+                self.auto_step=8
                  
     def get_distance(self, other):
         return abs(other.pos[0]-self.pos[0])+abs(other.pos[1]-self.pos[1])
                 
     def is_adjacent(self, other):
-        if self.get_distance(other)==1:
+        if self.get_distance(other)<=1:
             return True
         else:
             return False
@@ -157,9 +170,9 @@ class Player(Sprite):
         for frame in range(4):
             self.image = self.frames[self.direction][frame]
             yield None
-            self.move(3*DX[self.direction], 4*DY[self.direction])
+            self.auto_move()
             yield None
-            self.move(3*DX[self.direction], 4*DY[self.direction])
+            self.auto_move()
 
     def update(self, *args):
         """Run the current animation or just stand there if no animation set."""
