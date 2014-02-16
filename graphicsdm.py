@@ -139,8 +139,10 @@ class Sprite(pygame.sprite.Sprite):
                         d=0
                     else:
                         d=2
-                self.direction=d
-                self.auto_step=8
+                xnew, ynew = self.pos[0]+DX[d], self.pos[1]+DY[d]
+                if not self.game.level.is_blocking(xnew, ynew):
+                    self.direction=d
+                    self.auto_step=8
                  
     def get_distance(self, other):
         return abs(other.pos[0]-self.pos[0])+abs(other.pos[1]-self.pos[1])
