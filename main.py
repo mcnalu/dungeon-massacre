@@ -9,9 +9,10 @@ Dungeon massacre. A dungeon crawling game
 
 """
 
-from rdlevel import *
-from random import randint
+import pygame
 from pygame import Rect, Color
+from leveldm import *
+from random import randint
 
 
 
