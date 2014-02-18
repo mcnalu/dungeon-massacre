@@ -12,6 +12,7 @@ by Radomir Dopieralski <qq@sheep.art.pl>
 
 import pygame
 import pygame.locals as pg
+from random import randint
 
 # Dimensions of the map tiles
 MAP_TILE_WIDTH, MAP_TILE_HEIGHT = 24, 32
@@ -125,24 +126,35 @@ class Sprite(pygame.sprite.Sprite):
         
         self.animation.next()
         if 'monster' in self.item and self.direction==-1:
+            d=-1
             p=self.game.level.player
-            if self.is_adjacent(p):
+            other_monster=self.game.level.get_item(self.pos[0],self.pos[1], 'monster', [self.item])
+            if self.pos==p.pos:
+                d=randint(0,3)
+            elif other_monster is not None:
+                d=randint(0,3)
+            elif self.is_adjacent(p):
                 self.game.score.health-=1
             elif self.get_distance(p)<6:
-                if abs(p.pos[0]-self.pos[0])>=abs(p.pos[1]-self.pos[1]):
-                    if p.pos[0]<self.pos[0]:
-                        d=3
-                    else:
-                        d=1
-                else:
-                    if p.pos[1]<self.pos[1]:
-                        d=0
-                    else:
-                        d=2
+                d=self.get_direction_to(p)
+            if d>=0:
                 xnew, ynew = self.pos[0]+DX[d], self.pos[1]+DY[d]
                 if not self.game.level.is_blocking(xnew, ynew):
                     self.direction=d
                     self.auto_step=8
+    
+    def get_direction_to(self, other):
+        if abs(other.pos[0]-self.pos[0])>=abs(other.pos[1]-self.pos[1]):
+            if other.pos[0]<self.pos[0]:
+                d=3
+            else:
+                d=1
+        else:
+            if other.pos[1]<self.pos[1]:
+                d=0
+            else:
+                d=2
+        return d
                  
     def get_distance(self, other):
         return abs(other.pos[0]-self.pos[0])+abs(other.pos[1]-self.pos[1])

@@ -134,12 +134,17 @@ class Level(object):
         else:
             return 'block' in self.get_tile(x, y)
 
-    def get_item(self, x, y, kind=None):
+    def get_item(self, x, y, kind=None, ignore_items=[]):
         for s in self.sprites:
             if s.pos==(x, y):
-                if kind is None or kind in s.item:
+                if (kind is None or kind in s.item) and s.item not in ignore_items:
                     return s.item
         return None
             
     def remove_item(self, item):
         self.sprites.remove(item['sprite_obj'])
+
+    def print_debug(self, kind=None):
+        for s in self.sprites:
+            if kind is None or kind in s.item:
+                print s.pos,s.item['name']

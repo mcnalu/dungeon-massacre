@@ -76,6 +76,12 @@ class Game(object):
             walk(1)
         elif pressed(pg.K_SPACE):
             fight()
+        elif pressed(pg.K_p):
+            print 'All items:'
+            self.level.print_debug()
+        elif pressed(pg.K_m):
+            print 'Monster items:'
+            self.level.print_debug('monster')
         self.pressed_key = None
 
     def main(self):
@@ -106,7 +112,7 @@ class Game(object):
                 dirty_rects.append(self.score.rect)
             pygame.display.update(dirty_rects)
             # Wait for one tick of the game clock
-            clock.tick(15)
+            clock.tick(30)
             # Process pygame events
             for event in pygame.event.get():
                 if event.type == pg.QUIT:
